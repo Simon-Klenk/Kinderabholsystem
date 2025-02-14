@@ -13,3 +13,9 @@ This project is licensed under the **MIT License**. See the `LICENSE` file in th
 ## Third-Party Libraries
 
 This project includes code that is licensed under the MIT License. For more details, refer to the `LICENSE` file in the project directory.
+
+## Installation
+
+For installation instructions, please refer to the INSTALL.md file in the docs directory.
+
+
