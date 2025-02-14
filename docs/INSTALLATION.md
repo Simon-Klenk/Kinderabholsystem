@@ -40,8 +40,8 @@ Install Django, Gunicorn, OSC, Requests, Django Rest Framework, and CORS headers
 pip install django requests python-osc djangorestframework django-cors-headers
 pip3 install gunicorn
 
-8. Create Django Project
-Create a new Django project named Kinderabholsystem.
+8. Create and instert Django Project
+Create a new Django project named Kinderabholsystem and update with the repository files: urlss.py file from Kinderabholsystem/Kinderabholsystem and the directonary messages_app from Kinderabholsystem. At the settings.py in Kinderabholsystem/Kinderabholsystem insert at INSTALLED_APPS "'messages_app'"
 
 django-admin startproject Kinderabholsystem
 
@@ -63,26 +63,7 @@ sudo systemctl restart nginx
 Create a systemd service for Gunicorn to run the Django app.
 
 sudo nano /etc/systemd/system/gunicorn.service
-Add the following content:
-
-[Unit]
-Description=gunicorn daemon for Django project "Kinderabholsystem"
-After=network.target
-
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/www-data/Kinderabholsystem
-ExecStart=/www-data/venv/bin/gunicorn --workers 1 --bind 127.0.0.1:8000 Kinderabholsystem.wsgi:application
-
-[Install]
-WantedBy=multi-user.target
-Enable and start the Gunicorn service:
-
-sudo systemctl enable gunicorn
-sudo systemctl daemon-reload
-sudo systemctl start gunicorn
-sudo systemctl status gunicorn
+Add the content from the gunicorn.service file in the repository
 
 12. Configure Firewall
 Allow necessary ports through the firewall for HTTP,  SSH access.
