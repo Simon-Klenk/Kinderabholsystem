@@ -1,0 +1,12 @@
+[Unit]
+Description=gunicorn daemon for Django project "Kinderabholsystem"
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/www-data/Kinderabholsystem
+ExecStart=/www-data/venv/bin/gunicorn --workers 1 --bind 127.0.0.1:8000 Kinderabholsystem.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
