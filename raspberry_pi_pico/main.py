@@ -234,7 +234,7 @@ async def monitor_buttons():
             led_alert_light = False
             message_id = 0
             await uasyncio.sleep(2)
-        await uasyncio.sleep(0.1)
+        await uasyncio.sleep(0.3)
 
 
 async def control_LED():
@@ -249,12 +249,12 @@ async def control_LED():
     while True:
         if led_alert_light:
             led_alert.value(1)
-            await uasyncio.sleep(0.5)
+            await uasyncio.sleep(1.5)
             led_alert.value(0)
-            await uasyncio.sleep(0.5)
+            await uasyncio.sleep(1.5)
         else:
             led_alert.value(0)
-            await uasyncio.sleep(0.5)
+            await uasyncio.sleep(1.5)
 
 
 async def start_http_server():
