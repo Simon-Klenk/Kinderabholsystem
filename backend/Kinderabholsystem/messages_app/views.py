@@ -67,7 +67,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
         stop_event.clear()
 
     # Show initial message
-    send_osc_message(f"Parents of {message} please come to check-in", "1.0")
+    send_osc_message(f"Die Eltern von {message} bitte zum Check-in kommen", "1.0")
 
     def send_after_delay():
         """Thread target function for delayed operations"""
@@ -173,7 +173,7 @@ class MessageStatusUpdateAPIView(APIView):
         try:
             new_status = request.data.get('status')
             
-            if new_status not in ["received", "approved", "displayed"]:
+            if new_status not in ["received", "approved", "displayed", "rejected"]:
                 return Response(
                     {'error': 'Invalid status value'}, 
                     status=status.HTTP_400_BAD_REQUEST
