@@ -13,7 +13,9 @@ from display import Display
 import time
 import re
 
-BACKEND_URL = "http://192.168.104.45/api/messages/"
+BACKEND_IP = "192.168.104.45"
+BACKEND_URL_MESSAGES = f"http://{BACKEND_IP}/api/messages/"
+BACKEND_URL_CLEAR = f"http://{BACKEND_IP}/api/clear/"
 
 LED_ALERT_PIN = 2
 BUTTON_ACCEPT_PIN = 15
@@ -175,7 +177,7 @@ async def update_message_status(msg_id, status):
     Raises:
         Exception: If there is an error sending the request.
     """
-    url = f"{BACKEND_URL}{msg_id}/"
+    url = f"{BACKEND_URL_MESSAGES}{msg_id}/"
     try:
         response = urequests.patch(url, json={"status": status})
         if response.status_code == 200:
@@ -220,6 +222,18 @@ async def monitor_buttons():
             oled_display.show_text = False
             oled_display.new_text = True
             await uasyncio.sleep(2)
+        elif button_reject.value() == 1 and not oled_display.show_text:
+            try:
+                response = urequests.post(BACKEND_URL_CLEAR, json={"clear": True})
+                if response.status_code == 200:
+                    print(f"Clear successfully sent to backend")
+                else:
+                    print(f"Error sending clear to backend: {response.status_code}")
+            except Exception as e:
+                print("Error sending clear:", e)
+            led_alert_light = False
+            message_id = 0
+            await uasyncio.sleep(2)
         await uasyncio.sleep(0.1)
 
 
@@ -261,7 +275,7 @@ async def startup_display():
     
     The display is updated with the message "Start...", then turned off after the delay.
     """
-    oled_display.text = "Start..."
+    oled_display.text = "System laeuft"
     oled_display.show_text = True
     oled_display.new_text = True
     await uasyncio.sleep(7)
