@@ -25,6 +25,7 @@ PARAM_PATH_TEMPLATE = "/composition/layers/4/clips/{}/video/effects/textblock/ef
 active_thread = None
 stop_event = threading.Event()
 clear_requested = False  # Flag for manual clear operations
+number = 0
 
 def send_osc_message(message: str, opacity: float) -> None:
     """
@@ -58,7 +59,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
         
     Immediately shows message, then clears it after delay unless interrupted.
     """
-    global active_thread, stop_event
+    global active_thread, stop_event, number
     
     # Stop any existing message thread
     if active_thread and active_thread.is_alive():
@@ -68,6 +69,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
 
     # Show initial message
     send_osc_message(f"Die Eltern von {message} bitte zum Check-in kommen", "1.0")
+    number = message_pk
 
     def send_after_delay():
         """Thread target function for delayed operations"""
@@ -195,9 +197,10 @@ class ClearLayerAPIView(APIView):
     
     def post(self, request) -> Response:
         """Clear current display and stop active threads"""
-        global active_thread, stop_event, clear_requested
+        global active_thread, stop_event, clear_requested, number
         
         if active_thread and active_thread.is_alive():
+            update_state(number, "displayed")
             clear_requested = True
             stop_event.set()
             active_thread.join()
