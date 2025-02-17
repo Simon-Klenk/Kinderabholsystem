@@ -162,6 +162,18 @@ async def handle_message(request):
 
     return {'status': 'Message received'}, 200
 
+@app.route('/live', methods=['GET'])
+async def check_status(request):
+    """
+    Handles GET requests to the '/live' endpoint.
+
+    This endpoint is used to check if the Raspberry Pi Pico is running and responding. 
+    It returns a JSON response with the device status.
+
+    Returns:
+        tuple: A JSON response with status information and HTTP status code 200.
+    """
+    return {'status': 'running', 'device': 'Raspberry Pi Pico'}, 
 
 async def update_message_status(msg_id, status):
     """

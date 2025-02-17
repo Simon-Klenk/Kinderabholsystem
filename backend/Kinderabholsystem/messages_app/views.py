@@ -205,3 +205,29 @@ class ClearLayerAPIView(APIView):
             
         send_osc_message("", "0.0")
         return Response({'status': 'Display cleared successfully'})
+    
+class RaspberryLiveAPIView(APIView):
+    """API endpoint to check if Raspberry Pi is running"""
+
+    def get(self, request) -> Response:
+        """Check the run state of Raspberry Pi"""
+        RASPBERRY_PI_URL = "http://192.168.1.107/live"
+
+        try:
+            response = requests.get(RASPBERRY_PI_URL, timeout=5)
+        
+            if response.status_code == 200:
+                return Response({"status": "OK", "code": 200}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {"status": "Service Unavailable", "code": 503}, 
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
+        except requests.RequestException as e:
+            print(f"RPi connection failed: {e}")
+            return Response(
+                {"status": "Connection Failed", "error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+

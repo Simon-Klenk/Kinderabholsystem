@@ -3,6 +3,15 @@
     <!-- Title of the message creation form -->
     <h2 class="message-title">Nachricht an AV senden</h2>
 
+    <!-- Raspberry Pi Status -->
+    <p v-if="isRaspberryOnline" class="status-online">
+      ✅ Raspberry Pi ist online
+    </p>
+    <p v-else class="status-offline">
+      ❌ System funktioniert aktuell nicht - AV kann nicht benachrichtigt
+      werden!!
+    </p>
+
     <!-- Form for creating a new message -->
     <form @submit.prevent="createMessage">
       <p class="label">Die Eltern von</p>
@@ -18,8 +27,12 @@
         />
       </div>
       <p class="label2">bitte zum Check-in kommen</p>
-      <!-- Submit button, disabled if form is not valid or if submitting -->
-      <button type="submit" :disabled="!isValid || isSubmitting">
+
+      <!-- Submit button, disabled if form is not valid, submitting, or Raspberry Pi is offline -->
+      <button
+        type="submit"
+        :disabled="!isValid || isSubmitting || !isRaspberryOnline"
+      >
         Nachricht senden
       </button>
     </form>
@@ -41,18 +54,35 @@ export default {
   data() {
     return {
       // Message object containing the content and status of the message
-      message: {
-        content: "",
-        status: "sent",
-      },
-      successMessage: null,
-      errorMessage: null,
+      message: { content: "", status: "sent" },
+      successMessage: null, // Stores success message when the message is sent
+      errorMessage: null, // Stores error message in case of an issue
       isValid: false, // Flag indicating if the input is valid
       isSubmitting: false, // Flag indicating if the message is being sent
+      isRaspberryOnline: false, // Flag to check if Raspberry Pi is available
     };
   },
   methods: {
-    // Validates the input: checks format and length
+    /**
+     * Checks if the Raspberry Pi is running by making a GET request to the Django API.
+     * Updates `isRaspberryOnline` based on the response.
+     */
+    async checkRaspberryStatus() {
+      try {
+        // Send a GET request to check Raspberry Pi status
+        const response = await fetch("http://192.168.1.107/live", {
+          method: "GET",
+        });
+        this.isRaspberryOnline = response.ok; // If status is 200, the Raspberry is online
+      } catch (error) {
+        this.isRaspberryOnline = false; // If request fails, mark as offline
+      }
+    },
+
+    /**
+     * Validates the input: checks format and length.
+     * The input must follow the format "Vorname N." (first name + initial).
+     */
     validateInput() {
       const maxLength = 25;
       const regex = /^[A-Za-zÄÖÜäöüß]+\s[A-Za-z]\.$/; // Regex for format "Vorname N."
@@ -71,9 +101,13 @@ export default {
         this.isValid = isFormatValid && isLengthValid; // Set valid flag
       }
     },
-    // Handles form submission and sends the message via API
+
+    /**
+     * Handles form submission and sends the message via API.
+     * Ensures the Raspberry Pi is online before sending.
+     */
     async createMessage() {
-      if (!this.isValid || this.isSubmitting) return; // Prevent multiple submissions
+      if (!this.isValid || this.isSubmitting || !this.isRaspberryOnline) return; // Prevent multiple submissions
 
       this.isSubmitting = true; // Set the status to 'sending'
 
@@ -94,9 +128,7 @@ export default {
         this.errorMessage = null;
 
         // Redirect to the state page after a short delay
-        setTimeout(() => {
-          this.$router.push("/state");
-        }, 1500);
+        setTimeout(() => this.$router.push("/state"), 1500);
 
         // Reset the form and disable the submit button
         this.message.content = "";
@@ -111,6 +143,15 @@ export default {
         this.isSubmitting = false;
       }
     },
+  },
+
+  /**
+   * Lifecycle hook: Runs when the component is mounted.
+   * Checks the Raspberry Pi status immediately and every 2 seconds.
+   */
+  mounted() {
+    this.checkRaspberryStatus(); // Initial check
+    setInterval(this.checkRaspberryStatus, 2000); // Check every 2 seconds
   },
 };
 </script>
@@ -134,12 +175,8 @@ export default {
 }
 
 /* Styling for the labels */
-.label {
-  margin-bottom: 5px;
-  font-size: 16px;
-}
+.label,
 .label2 {
-  margin-top: 5px;
   font-size: 16px;
 }
 
@@ -153,15 +190,15 @@ input {
 }
 
 /* Styling for error and success messages */
-.error {
-  color: red;
+.success {
+  color: green;
   font-size: 16px;
   text-align: center;
   margin-top: 10px;
 }
 
-.success {
-  color: green;
+.error {
+  color: red;
   font-size: 16px;
   text-align: center;
   margin-top: 10px;
@@ -186,5 +223,18 @@ button:hover {
 button:disabled {
   background-color: lightgray;
   cursor: not-allowed;
+}
+
+/* Raspberry Pi online/offline status messages */
+.status-online {
+  color: green;
+  font-size: 16px;
+  text-align: center;
+}
+
+.status-offline {
+  color: red;
+  font-size: 16px;
+  text-align: center;
 }
 </style>
