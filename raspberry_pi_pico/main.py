@@ -261,7 +261,7 @@ async def control_LED():
     while True:
         if led_alert_light:
             led_alert.value(1)
-            await uasyncio.sleep(1.5)
+            await uasyncio.sleep(0.5)
             led_alert.value(0)
             await uasyncio.sleep(1.5)
         else:
