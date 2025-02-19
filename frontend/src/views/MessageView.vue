@@ -69,8 +69,8 @@ export default {
      */
     async checkRaspberryStatus() {
       try {
-        // Send a GET request to check Raspberry Pi status
-        const response = await fetch("http://192.168.1.107/live", {
+        // Send a GET request to Server to check Raspberry Pi status
+        const response = await fetch("http://192.168.104.45/live", {
           method: "GET",
         });
         this.isRaspberryOnline = response.ok; // If status is 200, the Raspberry is online

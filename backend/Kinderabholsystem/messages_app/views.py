@@ -13,7 +13,7 @@ from pythonosc.udp_client import SimpleUDPClient
 import requests
 
 # OSC Configuration for Resolume Arena
-RESOLUME_IP = "192.168.1.109"  # Resolume software IP address
+RESOLUME_IP = "192.168.104.10"  # Resolume software IP address
 RESOLUME_PORT = 7000            # Default OSC port in Resolume
 client = SimpleUDPClient(RESOLUME_IP, RESOLUME_PORT)
 
