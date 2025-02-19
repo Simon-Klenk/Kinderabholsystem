@@ -101,7 +101,7 @@ def send_message_to_raspberry_pi(content: str, pk: int) -> None:
         content (str): Message text content
         pk (int): Primary key of Message object
     """
-    RASPBERRY_PI_URL = "http://192.168.1.107/"
+    RASPBERRY_PI_URL = "http://192.168.104.212/"
     
     try:
         response = requests.post(
@@ -214,7 +214,7 @@ class RaspberryLiveAPIView(APIView):
 
     def get(self, request) -> Response:
         """Check the run state of Raspberry Pi"""
-        RASPBERRY_PI_URL = "http://192.168.1.107/live"
+        RASPBERRY_PI_URL = "http://192.168.104.212/live"
 
         try:
             response = requests.get(RASPBERRY_PI_URL, timeout=5)
