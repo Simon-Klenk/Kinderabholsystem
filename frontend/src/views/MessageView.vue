@@ -4,9 +4,7 @@
     <h2 class="message-title">Nachricht an AV senden</h2>
 
     <!-- Raspberry Pi Status -->
-    <p v-if="isRaspberryOnline" class="status-online">
-      ✅ Raspberry Pi ist online
-    </p>
+    <p v-if="isRaspberryOnline" class="status-online"></p>
     <p v-else class="status-offline">
       ❌ System funktioniert aktuell nicht - AV kann nicht benachrichtigt
       werden!!
@@ -69,13 +67,17 @@ export default {
      */
     async checkRaspberryStatus() {
       try {
-        // Send a GET request to Server to check Raspberry Pi status
-        const response = await fetch("http://192.168.104.45/live", {
+        console.log("Prüfe Raspberry Pi Status...");
+        const response = await fetch("http://192.168.104.45/api/live/", {
           method: "GET",
         });
-        this.isRaspberryOnline = response.ok; // If status is 200, the Raspberry is online
+
+        this.isRaspberryOnline = response.ok;
+
+        console.log("Raspberry Online Status:", this.isRaspberryOnline);
       } catch (error) {
-        this.isRaspberryOnline = false; // If request fails, mark as offline
+        this.isRaspberryOnline = false;
+        console.log("Fehler beim Abrufen des Status:", error);
       }
     },
 
@@ -151,7 +153,7 @@ export default {
    */
   mounted() {
     this.checkRaspberryStatus(); // Initial check
-    setInterval(this.checkRaspberryStatus, 2000); // Check every 2 seconds
+    // setInterval(this.checkRaspberryStatus, 2000); // Check every 2 seconds
   },
 };
 </script>
