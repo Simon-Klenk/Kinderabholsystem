@@ -149,7 +149,7 @@ class Display:
                                 self.display.show()
                                 if x_offset == 0:
                                     await uasyncio.sleep(0.8)
-                                await uasyncio.sleep(0.01)
+                                await uasyncio.sleep(0.02)
                         else:
                             # Display static text if it fits
                             self.display.blit(fb_scaled, 0, 0)
@@ -167,3 +167,4 @@ class Display:
             self.display.fill(0)
             self.display.show()
             self.display.poweroff()
+        await uasyncio.sleep(1)

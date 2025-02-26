@@ -91,7 +91,7 @@ def sanitize_text(text):
       - 'ß' with 'ss'
     
     It then removes all characters except letters, numbers, spaces, and specific punctuation,
-    and finally limits the length of the text to 25 characters.
+    and finally limits the length of the text to 20 characters.
     
     Args:
         text (str): The input text to be sanitized.
@@ -110,8 +110,8 @@ def sanitize_text(text):
     text = re.sub(r'[^a-zA-Z0-9 .,?!-]', '', text)
     text = text.strip()
     
-    if len(text) > 25:
-        text = text[:25]
+    if len(text) > 20:
+        text = text[:20]
     return text
 
 
@@ -173,7 +173,7 @@ async def check_status(request):
     Returns:
         tuple: A JSON response with status information and HTTP status code 200.
     """
-    return {'status': 'running', 'device': 'Raspberry Pi Pico'}, 
+    return {'status': 'running'}, 200
 
 async def update_message_status(msg_id, status):
     """
@@ -246,7 +246,7 @@ async def monitor_buttons():
             led_alert_light = False
             message_id = 0
             await uasyncio.sleep(2)
-        await uasyncio.sleep(0.3)
+        await uasyncio.sleep(0.2)
 
 
 async def control_LED():
@@ -261,9 +261,9 @@ async def control_LED():
     while True:
         if led_alert_light:
             led_alert.value(1)
-            await uasyncio.sleep(0.5)
-            led_alert.value(0)
             await uasyncio.sleep(1.5)
+            led_alert.value(0)
+            await uasyncio.sleep(3)
         else:
             led_alert.value(0)
             await uasyncio.sleep(1.5)
@@ -287,10 +287,10 @@ async def startup_display():
     
     The display is updated with the message "Start...", then turned off after the delay.
     """
-    oled_display.text = "System laeuft"
+    oled_display.text = "Okay"
     oled_display.show_text = True
     oled_display.new_text = True
-    await uasyncio.sleep(7)
+    await uasyncio.sleep(5)
     oled_display.show_text = False
     oled_display.new_text = True
 
@@ -311,7 +311,7 @@ def main():
     loop.create_task(monitor_buttons())
     loop.create_task(control_LED())
     loop.create_task(start_http_server())
-    loop.create_task(oled_display.print_oled())  # Assumes print_oled() is an async method in Display
+    loop.create_task(oled_display.print_oled())
     loop.create_task(startup_display())
     loop.run_forever()
 
