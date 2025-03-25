@@ -10,7 +10,7 @@
       werden!!
     </p>
 
-    <!-- Form for creating a new message -->
+    <!-- Form for creating a new emergency message -->
     <form @submit.prevent="createMessage">
       <p class="label">NOTFALL</p>
       <div>
@@ -106,11 +106,17 @@ export default {
       this.isSubmitting = true; // Set the status to 'sending'
 
       try {
+        // Add the word Notfall to message
+        const messageToSend = {
+          content: `Notfall: ${this.message.content}`,
+          status: "sent",
+        };
+
         // Make an API request to send the message
         const response = await fetch("http://192.168.104.45/api/emergency/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(this.message),
+          body: JSON.stringify(messageToSend),
         });
 
         // Handle non-successful response

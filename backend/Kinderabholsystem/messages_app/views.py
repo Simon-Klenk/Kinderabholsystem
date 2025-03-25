@@ -68,7 +68,10 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
         stop_event.clear()
 
     # Show initial message
-    send_osc_message(f"Die Eltern von {message} bitte zum Check-in kommen", "1.0")
+    if "Notfall:" in message:
+        send_osc_message(message, "1.0")
+    else:
+        send_osc_message(f"Die Eltern von {message} bitte zum Check-in kommen", "1.0")
     number = message_pk
 
     def send_after_delay():
@@ -208,11 +211,6 @@ class ClearLayerAPIView(APIView):
             
         send_osc_message("", "0.0")
         return Response({'status': 'Display cleared successfully'})
-    
-import requests
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 
 class RaspberryLiveAPIView(APIView):
     """API endpoint to check if Raspberry Pi is running"""
@@ -236,4 +234,14 @@ class RaspberryLiveAPIView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
-
+class EmergencyAPIView(APIView):
+    """API endpoint for emergency message creation"""
+    
+    def post(self, request) -> Response:
+        """Create new emergency message and forward to Raspberry Pi"""
+        serializer = MessageSerializer(data=request.data)
+        if serializer.is_valid():
+            message = serializer.save()
+            send_message_to_raspberry_pi(serializer.data['content'], message.id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

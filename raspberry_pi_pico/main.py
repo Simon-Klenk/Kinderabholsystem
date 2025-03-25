@@ -110,8 +110,8 @@ def sanitize_text(text):
     text = re.sub(r'[^a-zA-Z0-9 .,?!-]', '', text)
     text = text.strip()
     
-    if len(text) > 20:
-        text = text[:20]
+    if len(text) > 35:
+        text = text[:35]
     return text
 
 
