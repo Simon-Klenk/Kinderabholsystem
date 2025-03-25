@@ -5,7 +5,9 @@
   <!-- Navigation links for the application -->
   <nav>
     <!-- Link to send a new message -->
-    <router-link to="/">Nachricht senden</router-link> |
+    <router-link to="/">Kind abholen</router-link> |
+    <!-- Link to view the emergency page -->
+    <router-link to="/emergency">Notfall - Hilfe anfordern</router-link> |
     <!-- Link to view the status page -->
     <router-link to="/state">Status</router-link>
   </nav>

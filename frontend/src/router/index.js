@@ -13,6 +13,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "state" */ "../views/StateView.vue"),
   },
+  {
+    path: "/emergency",
+    name: "emergency",
+    component: () =>
+      import(/* webpackChunkName: "state" */ "../views/EmergencyView.vue"),
+  },
 ];
 
 const router = createRouter({

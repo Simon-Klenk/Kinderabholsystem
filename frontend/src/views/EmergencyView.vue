@@ -1,7 +1,7 @@
 <template>
   <div class="message-create">
     <!-- Title of the message creation form -->
-    <h2 class="message-title">Kind abholen - Nachricht an AV senden</h2>
+    <h2 class="message-title">Notfall - Hilfe anfordern</h2>
 
     <!-- Raspberry Pi Status -->
     <p v-if="isRaspberryOnline" class="status-online"></p>
@@ -12,19 +12,18 @@
 
     <!-- Form for creating a new message -->
     <form @submit.prevent="createMessage">
-      <p class="label">Die Eltern von</p>
+      <p class="label">NOTFALL</p>
       <div>
-        <!-- Input for the recipient's name (first name and initial) -->
+        <!-- Input the emergeny person -->
         <input
           type="text"
           id="content"
           v-model="message.content"
-          placeholder="Vorname N."
+          placeholder="Wer wird benötigt?"
           @input="validateInput"
           required
         />
       </div>
-      <p class="label2">bitte zum Check-in kommen</p>
 
       <!-- Submit button, disabled if form is not valid, submitting, or Raspberry Pi is offline -->
       <button
@@ -86,21 +85,14 @@ export default {
      * The input must follow the format "Vorname N." (first name + initial).
      */
     validateInput() {
-      const maxLength = 25;
-      const regex = /^[A-Za-zÄÖÜäöüß]+\s[A-Za-z]\.$/; // Regex for format "Vorname N."
-      const isFormatValid = regex.test(this.message.content);
+      const maxLength = 35;
       const isLengthValid = this.message.content.length <= maxLength;
 
       // If the input length exceeds the limit, show an error message
       if (!isLengthValid) {
         this.errorMessage = `Die Eingabe darf maximal ${maxLength} Zeichen lang sein.`;
         this.isValid = false;
-      } else {
-        // If format is invalid, show a format-specific error
-        this.errorMessage = isFormatValid
-          ? null
-          : "Bitte das Format 'Vorname N.' verwenden. Datenschutz!!!";
-        this.isValid = isFormatValid && isLengthValid; // Set valid flag
+        this.isValid = isLengthValid; // Set valid flag
       }
     },
 
@@ -115,7 +107,7 @@ export default {
 
       try {
         // Make an API request to send the message
-        const response = await fetch("http://192.168.104.45/api/messages/", {
+        const response = await fetch("http://192.168.104.45/api/emergency/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(this.message),
