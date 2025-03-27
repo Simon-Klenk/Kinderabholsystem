@@ -68,7 +68,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
         stop_event.clear()
 
     # Show initial message
-    if "Notfall:" in message:
+    if "Medizinischer Notfall:" in message:
         send_osc_message(message, "1.0")
     else:
         send_osc_message(f"Die Eltern von {message} bitte zum Check-in kommen", "1.0")

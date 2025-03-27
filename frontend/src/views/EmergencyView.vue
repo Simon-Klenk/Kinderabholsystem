@@ -1,45 +1,41 @@
 <template>
   <div class="message-create">
-    <!-- Title of the message creation form -->
+    <!-- Emergency Request Title -->
     <h2 class="message-title">Notfall - Hilfe anfordern</h2>
 
-    <!-- Raspberry Pi Status -->
-    <p v-if="isRaspberryOnline" class="status-online"></p>
-    <p v-else class="status-offline">
+    <!-- Display a warning message if the Raspberry Pi is offline -->
+    <p v-if="!isRaspberryOnline" class="status-offline">
       ❌ System funktioniert aktuell nicht - AV kann nicht benachrichtigt
       werden!!
     </p>
 
-    <!-- Form for creating a new emergency message -->
-    <form @submit.prevent="createMessage">
-      <p class="label">NOTFALL</p>
-      <div>
-        <!-- Input the emergeny person -->
-        <input
-          type="text"
-          id="content"
-          v-model="message.content"
-          placeholder="Wer wird benötigt?"
-          @input="validateInput"
-          required
-        />
-      </div>
+    <!-- Inform the user about the message that will be sent -->
+    <div class="message-text">
+      Du sendest zur Anzeige auf der LED-Wall folgene Nachricht an AV:
+    </div>
 
-      <!-- Submit button, disabled if form is not valid, submitting, or Raspberry Pi is offline -->
-      <button
-        type="submit"
-        :disabled="!isValid || isSubmitting || !isRaspberryOnline"
-      >
-        Nachricht senden
-      </button>
-    </form>
+    <div class="spaced-text">
+      <strong>
+        Medizinischer Notfall: Sanitäter / Arzt / Fachpersonal - bitte zum Kids
+        Check-In kommen!
+      </strong>
+    </div>
 
-    <!-- Success message displayed when the message is successfully sent -->
+    <!-- Emergency button, disabled if the Raspberry Pi is offline or request is in progress -->
+    <button
+      @click="confirmAndSendMessage"
+      :disabled="!isRaspberryOnline || isSubmitting"
+      class="spaced-button"
+    >
+      Notfallnachricht senden
+    </button>
+
+    <!-- Display success message when the message is sent successfully -->
     <div v-if="successMessage" class="success">
       <p>Nachricht erfolgreich gesendet!</p>
     </div>
 
-    <!-- Error message displayed if there is an issue with the submission -->
+    <!-- Display error message if sending fails -->
     <div v-if="errorMessage" class="error">
       <p>{{ errorMessage }}</p>
     </div>
@@ -50,114 +46,75 @@
 export default {
   data() {
     return {
-      // Message object containing the content and status of the message
-      message: { content: "", status: "sent" },
-      successMessage: null, // Stores success message when the message is sent
-      errorMessage: null, // Stores error message in case of an issue
-      isValid: false, // Flag indicating if the input is valid
-      isSubmitting: false, // Flag indicating if the message is being sent
-      isRaspberryOnline: false, // Flag to check if Raspberry Pi is available
+      successMessage: null, // Stores success feedback when message is sent
+      errorMessage: null, // Stores error messages in case of failure
+      isSubmitting: false, // Flag to track if the message is being sent
+      isRaspberryOnline: false, // Indicates if the Raspberry Pi is reachable
     };
   },
   methods: {
     /**
-     * Checks if the Raspberry Pi is running by making a GET request to the Django API.
-     * Updates `isRaspberryOnline` based on the response.
+     * Checks the availability of the Raspberry Pi by making a request to the API.
+     * Updates the "isRaspberryOnline" state accordingly.
      */
     async checkRaspberryStatus() {
       try {
-        console.log("Prüfe Raspberry Pi Status...");
-        const response = await fetch("http://192.168.104.45/api/live/", {
-          method: "GET",
-        });
-
+        const response = await fetch("http://192.168.104.45/api/live/");
         this.isRaspberryOnline = response.ok;
-
-        console.log("Raspberry Online Status:", this.isRaspberryOnline);
       } catch (error) {
         this.isRaspberryOnline = false;
-        console.log("Fehler beim Abrufen des Status:", error);
       }
     },
 
     /**
-     * Validates the input: checks format and length.
-     * The input must follow the format "Vorname N." (first name + initial).
+     * Sends an emergency message to the API endpoint if the Raspberry Pi is online.
+     * Displays success or error messages accordingly.
      */
-    validateInput() {
-      const maxLength = 35;
-      const isLengthValid = this.message.content.length <= maxLength;
-
-      // If the input length exceeds the limit, show an error message
-      if (!isLengthValid) {
-        this.errorMessage = `Die Eingabe darf maximal ${maxLength} Zeichen lang sein.`;
-        this.isValid = false;
-        this.isValid = isLengthValid; // Set valid flag
-      }
-    },
-
-    /**
-     * Handles form submission and sends the message via API.
-     * Ensures the Raspberry Pi is online before sending.
-     */
-    async createMessage() {
-      if (!this.isValid || this.isSubmitting || !this.isRaspberryOnline) return; // Prevent multiple submissions
-
-      this.isSubmitting = true; // Set the status to 'sending'
-
+    async sendMessage() {
+      this.isSubmitting = true; // Disable button while submitting
       try {
-        // Add the word Notfall to message
-        const messageToSend = {
-          content: `Notfall: ${this.message.content}`,
-          status: "sent",
-        };
-
-        // Make an API request to send the message
         const response = await fetch("http://192.168.104.45/api/emergency/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(messageToSend),
+          body: JSON.stringify({
+            content:
+              "Medizinischer Notfall: Sanitäter / Arzt / Fachpersonal - bitte zum Kids Check-In kommen!",
+            status: "sent",
+          }),
         });
-
-        // Handle non-successful response
-        if (!response.ok)
-          throw new Error(`HTTP-Fehler! Status: ${response.status}`);
-
-        // On success, display a success message and clear any previous errors
+        if (!response.ok) throw new Error(`HTTP-Fehler: ${response.status}`);
         this.successMessage = "Nachricht erfolgreich gesendet!";
         this.errorMessage = null;
-
-        // Redirect to the state page after a short delay
         setTimeout(() => this.$router.push("/state"), 1500);
-
-        // Reset the form and disable the submit button
-        this.message.content = "";
-        this.message.status = "sent";
-        this.isValid = false;
       } catch (error) {
-        // If an error occurs, display an error message
-        this.errorMessage = `Fehler beim Senden der Nachricht: ${error.message}`;
-        this.successMessage = null;
+        this.errorMessage = `Fehler beim Senden: ${error.message}`;
       } finally {
-        // Reset the submitting flag after the process is complete
-        this.isSubmitting = false;
+        this.isSubmitting = false; // Re-enable button after submission
+      }
+    },
+
+    /**
+     * Displays a confirmation dialog before sending the emergency message.
+     * Calls sendMessage() only if the user confirms.
+     */
+    confirmAndSendMessage() {
+      if (confirm("Sicher, dass du senden möchtest?")) {
+        this.sendMessage();
       }
     },
   },
 
   /**
-   * Lifecycle hook: Runs when the component is mounted.
-   * Checks the Raspberry Pi status immediately and every 2 seconds.
+   * Lifecycle hook: Checks the Raspberry Pi status when the component is mounted.
    */
   mounted() {
-    this.checkRaspberryStatus(); // Initial check
-    // setInterval(this.checkRaspberryStatus, 2000); // Check every 2 seconds
+    this.checkRaspberryStatus();
   },
 };
 </script>
 
 <style scoped>
-/* Styling for the message creation form container */
+/* Container styling */
 .message-create {
   max-width: 600px;
   margin: auto;
@@ -165,46 +122,16 @@ export default {
   background: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 /* Title styling */
 .message-title {
-  text-align: center;
   font-size: 24px;
   margin-bottom: 20px;
 }
 
-/* Styling for the labels */
-.label,
-.label2 {
-  font-size: 16px;
-}
-
-/* Styling for the input field */
-input {
-  width: 50%;
-  max-width: 400px;
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-/* Styling for error and success messages */
-.success {
-  color: green;
-  font-size: 16px;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.error {
-  color: red;
-  font-size: 16px;
-  text-align: center;
-  margin-top: 10px;
-}
-
-/* Styling for the submit button */
+/* Button styling */
 button {
   padding: 12px;
   background-color: gray;
@@ -212,29 +139,51 @@ button {
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: 20px;
 }
 
-/* Hover effect for the submit button */
+/* Button hover effect */
 button:hover {
-  background-color: rgba(36, 72, 36, 0.89);
+  background-color: green;
 }
 
-/* Disabled button state */
+/* Disabled button styling */
 button:disabled {
   background-color: lightgray;
   cursor: not-allowed;
 }
 
-/* Raspberry Pi online/offline status messages */
+/* Success message styling */
+.success {
+  color: green;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* Error message styling */
+.error {
+  color: red;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* Raspberry Pi online/offline status */
 .status-online {
   color: green;
   font-size: 16px;
-  text-align: center;
 }
 
 .status-offline {
   color: red;
   font-size: 16px;
-  text-align: center;
+}
+
+/* Extra spacing for the button */
+.spaced-button {
+  margin-top: 30px;
+}
+
+.spaced-text {
+  margin-top: 15px;
 }
 </style>

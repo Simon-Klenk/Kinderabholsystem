@@ -147,13 +147,8 @@ export default {
     },
   },
 
-  /**
-   * Lifecycle hook: Runs when the component is mounted.
-   * Checks the Raspberry Pi status immediately and every 2 seconds.
-   */
   mounted() {
     this.checkRaspberryStatus(); // Initial check
-    // setInterval(this.checkRaspberryStatus, 2000); // Check every 2 seconds
   },
 };
 </script>

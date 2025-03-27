@@ -1,7 +1,11 @@
 <template>
   <div class="message-item">
     <!-- Message text displaying the formatted message with dynamic user input -->
-    <div class="message-text">
+    <div v-if="text.includes('Medizinischer Notfall:')">
+      <strong>{{ text }}</strong>
+    </div>
+
+    <div class="message-text" v-else>
       Die Eltern von <strong>{{ text }}</strong> bitte zum Check-in kommen
     </div>
 
