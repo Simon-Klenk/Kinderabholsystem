@@ -17,7 +17,7 @@
     <div class="spaced-text">
       <strong>
         Medizinischer Notfall: Sanitäter / Arzt / Fachpersonal - bitte zum Kids
-        Check-In kommen!
+        Check-In!
       </strong>
     </div>
 
@@ -78,7 +78,7 @@ export default {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             content:
-              "Medizinischer Notfall: Sanitäter / Arzt / Fachpersonal - bitte zum Kids Check-In kommen!",
+              "Medizinischer Notfall: Sanitäter / Arzt / Fachpersonal - bitte zum Kids Check-In!",
             status: "sent",
           }),
         });

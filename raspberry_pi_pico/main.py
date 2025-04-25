@@ -91,7 +91,7 @@ def sanitize_text(text):
       - 'ß' with 'ss'
     
     It then removes all characters except letters, numbers, spaces, and specific punctuation,
-    and finally limits the length of the text to 20 characters.
+    and finally limits the length of the text to 50 characters.
     
     Args:
         text (str): The input text to be sanitized.
@@ -110,8 +110,8 @@ def sanitize_text(text):
     text = re.sub(r'[^a-zA-Z0-9 .,?!-]', '', text)
     text = text.strip()
     
-    if len(text) > 35:
-        text = text[:35]
+    if len(text) > 50:
+        text = text[:50]
     return text
 
 

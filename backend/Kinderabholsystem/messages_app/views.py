@@ -11,6 +11,7 @@ from .models import Message
 from .serializers import MessageSerializer
 from pythonosc.udp_client import SimpleUDPClient
 import requests
+import logging
 
 # OSC Configuration for Resolume Arena
 RESOLUME_IP = "192.168.104.10"  # Resolume software IP address
@@ -26,6 +27,7 @@ active_thread = None
 stop_event = threading.Event()
 clear_requested = False  # Flag for manual clear operations
 number = 0
+logger = logging.getLogger(__name__)
 
 def send_osc_message(message: str, opacity: float) -> None:
     """
@@ -69,6 +71,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
 
     # Show initial message
     if "Medizinischer Notfall:" in message:
+        logger.debug(message)
         send_osc_message(message, "1.0")
     else:
         send_osc_message(f"Die Eltern von {message} bitte zum Check-in kommen", "1.0")
@@ -137,6 +140,7 @@ def update_state(pk: int, new_status: str) -> bool:
     try:
         message = Message.objects.get(pk=pk)
         message.status = new_status
+        logger.debug(message.content)
         
         if new_status == "approved":
             delayed_send_osc_message(
