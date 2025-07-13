@@ -78,7 +78,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
     number = message_pk
 
     def send_after_delay():
-        """Thread target function for delayed operations"""
+        """Thread target function for delayed operation"""
         start = time.time()
         while (time.time() - start) < delay:
             if stop_event.is_set():
