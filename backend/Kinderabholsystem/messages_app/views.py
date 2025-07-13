@@ -19,8 +19,8 @@ RESOLUME_PORT = 7000            # Default OSC port in Resolume
 client = SimpleUDPClient(RESOLUME_IP, RESOLUME_PORT)
 
 # Resolume OSC parameter paths
-PARAM_PATH_OPACITY = "/composition/layers/4/video/opacity"
-PARAM_PATH_TEMPLATE = "/composition/layers/4/clips/{}/video/effects/textblock/effect/text/params/lines"
+PARAM_PATH_OPACITY = "/composition/layers/6/video/opacity"
+PARAM_PATH = "/composition/layers/6/clips/1/video/effects/textblock/effect/text/params/lines"
 
 # Global thread controller for message display management
 active_thread = None
@@ -41,9 +41,7 @@ def send_osc_message(message: str, opacity: float) -> None:
     """
     try:
         opacity = float(opacity)
-        for clip_id in range(1, 21):
-            param_path = PARAM_PATH_TEMPLATE.format(clip_id)
-            client.send_message(param_path, message)
+        client.send_message(PARAM_PATH, message)
         client.send_message(PARAM_PATH_OPACITY, opacity)
         print(f"Sent OSC message: {message}")
     except Exception as e:
@@ -78,7 +76,7 @@ def delayed_send_osc_message(message: str, delay: int = 120, message_pk: int = N
     number = message_pk
 
     def send_after_delay():
-        """Thread target function for delayed operation"""
+        """Thread target function for delayed operations"""
         start = time.time()
         while (time.time() - start) < delay:
             if stop_event.is_set():
