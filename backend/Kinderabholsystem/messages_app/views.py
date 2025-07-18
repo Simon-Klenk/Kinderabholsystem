@@ -21,6 +21,7 @@ client = SimpleUDPClient(RESOLUME_IP, RESOLUME_PORT)
 # Resolume OSC parameter paths
 PARAM_PATH_OPACITY = "/composition/layers/6/video/opacity"
 PARAM_PATH = "/composition/layers/6/clips/1/video/effects/textblock/effect/text/params/lines"
+PARAM_PATH_CONNECT = "/composition/layers/6/clips/1/connect"
 
 # Global thread controller for message display management
 active_thread = None
@@ -43,6 +44,8 @@ def send_osc_message(message: str, opacity: float) -> None:
         opacity = float(opacity)
         client.send_message(PARAM_PATH, message)
         client.send_message(PARAM_PATH_OPACITY, opacity)
+        connect = int(opacity)
+        client.send_message(PARAM_PATH_CONNECT, connect)
         print(f"Sent OSC message: {message}")
     except Exception as e:
         print(f"OSC communication error: {e}")
