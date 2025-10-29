@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
       - name: WireGuard installieren
         run: |
           sudo apt update
@@ -26,7 +29,7 @@ jobs:
           AllowedIPs = ${{ secrets.WG_ALLOWED_IPS }}" > wg0.conf
 
       - name: WireGuard Tunnel starten
-        run: sudo wg-quick up wg0
+        run: sudo wg-quick up $(pwd)/wg0.conf
 
       - name: Verbindung prüfen
         run: |
@@ -35,4 +38,4 @@ jobs:
 
       - name: WireGuard Tunnel stoppen
         if: always()
-        run: sudo wg-quick down wg0
+        run: sudo wg-quick down $(pwd)/wg0.conf
