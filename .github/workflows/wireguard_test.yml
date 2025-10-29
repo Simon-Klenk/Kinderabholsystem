@@ -18,8 +18,11 @@ jobs:
 
       - name: WireGuard Tunnel testen
         run: |
-          # Temporäre Konfigurationsdatei mit .conf erstellen
-          WG_CONF=$(mktemp wg0-XXXX.conf)
+          # Temporäres Verzeichnis erstellen
+          TMPDIR=$(mktemp -d)
+          WG_CONF="$TMPDIR/wg0.conf"
+
+          # Konfiguration in wg0.conf schreiben
           echo "[Interface]
           PrivateKey = ${{ secrets.WG_PRIVATE_KEY }}
           Address = 10.0.0.2/24
@@ -40,5 +43,5 @@ jobs:
           # Tunnel stoppen
           sudo wg-quick down $WG_CONF
 
-          # Temporäre Datei löschen
-          rm -f $WG_CONF
+          # Temporäres Verzeichnis löschen
+          rm -rf $TMPDIR
