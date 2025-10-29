@@ -16,10 +16,10 @@ jobs:
           sudo apt update
           sudo apt install -y wireguard iproute2 curl
 
-      - name: WireGuard konfigurieren (dynamisch)
+      - name: WireGuard Tunnel testen
         run: |
-          # Temporäre Datei erstellen
-          WG_CONF=$(mktemp)
+          # Temporäre Konfigurationsdatei mit .conf erstellen
+          WG_CONF=$(mktemp wg0-XXXX.conf)
           echo "[Interface]
           PrivateKey = ${{ secrets.WG_PRIVATE_KEY }}
           Address = 10.0.0.2/24
@@ -29,7 +29,7 @@ jobs:
           PublicKey = ${{ secrets.WG_SERVER_PUBLIC_KEY }}
           Endpoint = ${{ secrets.WG_ENDPOINT }}
           AllowedIPs = ${{ secrets.WG_ALLOWED_IPS }}" > $WG_CONF
-          
+
           # Tunnel starten
           sudo wg-quick up $WG_CONF
 
