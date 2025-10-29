@@ -1,7 +1,7 @@
 name: WireGuard Verbindungstest
 
 on:
-  workflow_dispatch:  # manuell auslösbar
+  workflow_dispatch:
 
 jobs:
   test-vpn:
@@ -16,8 +16,10 @@ jobs:
           sudo apt update
           sudo apt install -y wireguard iproute2 curl
 
-      - name: WireGuard konfigurieren
+      - name: WireGuard konfigurieren (dynamisch)
         run: |
+          # Temporäre Datei erstellen
+          WG_CONF=$(mktemp)
           echo "[Interface]
           PrivateKey = ${{ secrets.WG_PRIVATE_KEY }}
           Address = 10.0.0.2/24
@@ -26,16 +28,17 @@ jobs:
           [Peer]
           PublicKey = ${{ secrets.WG_SERVER_PUBLIC_KEY }}
           Endpoint = ${{ secrets.WG_ENDPOINT }}
-          AllowedIPs = ${{ secrets.WG_ALLOWED_IPS }}" > wg0.conf
+          AllowedIPs = ${{ secrets.WG_ALLOWED_IPS }}" > $WG_CONF
+          
+          # Tunnel starten
+          sudo wg-quick up $WG_CONF
 
-      - name: WireGuard Tunnel starten
-        run: sudo wg-quick up $(pwd)/wg0.conf
-
-      - name: Verbindung prüfen
-        run: |
+          # Verbindung prüfen
           echo "Meine öffentliche IP über WireGuard:"
           curl -s https://ifconfig.me
 
-      - name: WireGuard Tunnel stoppen
-        if: always()
-        run: sudo wg-quick down $(pwd)/wg0.conf
+          # Tunnel stoppen
+          sudo wg-quick down $WG_CONF
+
+          # Temporäre Datei löschen
+          rm -f $WG_CONF
