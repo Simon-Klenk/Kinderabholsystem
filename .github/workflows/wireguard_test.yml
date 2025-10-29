@@ -1,0 +1,38 @@
+name: WireGuard Verbindungstest
+
+on:
+  workflow_dispatch:  # manuell auslösbar
+
+jobs:
+  test-vpn:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: WireGuard installieren
+        run: |
+          sudo apt update
+          sudo apt install -y wireguard iproute2 curl
+
+      - name: WireGuard konfigurieren
+        run: |
+          echo "[Interface]
+          PrivateKey = ${{ secrets.WG_PRIVATE_KEY }}
+          Address = 10.0.0.2/24
+          DNS = 1.1.1.1
+
+          [Peer]
+          PublicKey = ${{ secrets.WG_SERVER_PUBLIC_KEY }}
+          Endpoint = ${{ secrets.WG_ENDPOINT }}
+          AllowedIPs = ${{ secrets.WG_ALLOWED_IPS }}" > wg0.conf
+
+      - name: WireGuard Tunnel starten
+        run: sudo wg-quick up wg0
+
+      - name: Verbindung prüfen
+        run: |
+          echo "Meine öffentliche IP über WireGuard:"
+          curl -s https://ifconfig.me
+
+      - name: WireGuard Tunnel stoppen
+        if: always()
+        run: sudo wg-quick down wg0
